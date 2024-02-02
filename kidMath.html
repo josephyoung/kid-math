@@ -5,20 +5,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>算术练习</title>
-    <script src="dayjs.min.js"></script>
+    <!-- <script src="dayjs.min.js"></script>
     <script src="duration.js"></script>
     <script src="vue.global.prod.js"></script>
     <script src="echarts.min.js"></script>
     <script src="arco-vue.min.js"></script>
     <script src="arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="arco.css" />
-    <!-- <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
+    <link rel="stylesheet" href="arco.css" /> -->
+    <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
     <script src="https://unpkg.com/dayjs/plugin/duration.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/echarts@5.4.0/dist/echarts.min.js"></script>
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js"></script>
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" /> -->
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" />
     <style>
       body {
         font-size: 24px;
@@ -212,8 +212,11 @@
                 <a-col :span="3">
                   <span>{{question.first}}</span>
                 </a-col>
-                <a-col :span="2">
-                  <span>{{question.operator}}</span>
+                <a-col :span="3">
+                  <template v-if="question.operator === '+'"><icon-plus /></template>
+                  <template v-else-if="question.operator === '-'"><icon-minus /></template>
+                  <template v-else-if="question.operator === '*'"><icon-close /></template>
+                  <template v-else>{{question.operator}}</template>
                 </a-col>
                 <a-col :span="3">
                   <span>{{question.second}}</span>
@@ -231,7 +234,7 @@
                     {{question.answer}}
                   </span>
                 </a-col>
-                <a-col :span="10">
+                <a-col :span="9">
                   <div style="text-align: right">
                     <span v-if="calc(question) === question.answer" class="success">
                       <icon-check-circle />
@@ -274,7 +277,7 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      const { createApp, reactive, computed, onMounted, ref, watch } = Vue;
+      const { createApp, reactive, computed, onMounted, ref, watch, nextTick } = Vue;
       dayjs.extend(dayjs_plugin_duration);
       const sound = window.speechSynthesis;
 
@@ -327,12 +330,13 @@
             }
           });
 
-          const reAnswer = () => {
+          const reAnswer = async () => {
             question.answer = undefined;
             question.showAnswer = false;
             question.completed = false;
             question.begin = dayjs().valueOf();
-            // input.value.focus();
+            await nextTick();
+            input.value.focus();
           };
 
           const setOperator = val => {
