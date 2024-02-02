@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="icon.jpeg" />
     <title>20以内加减法</title>
-    <script src="vue.global.prod.js"></script>
+    <!-- <script src="vue.global.prod.js"></script>
     <script src="echarts.min.js"></script>
     <script src="arco-vue.min.js"></script>
     <script src="arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="arco.css" />
-    <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link rel="stylesheet" href="arco.css" /> -->
+    <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
+    <script src="https://unpkg.com/dayjs/plugin/duration.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/echarts@5.4.0/dist/echarts.min.js"></script>
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js"></script>
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" /> -->
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" />
     <style>
       body {
         font-size: 24px;
@@ -172,7 +174,7 @@
               <a-space class="time" fill>
                 <span>本题用时</span>
                 <a-statistic
-                  :value="question.time"
+                  :value="duration / 1000"
                   :precision="2"
                   animation
                   :animation-duration="500"
@@ -190,10 +192,13 @@
           </a-space>
         </a-layout-content>
         <a-layout-footer class="histories-wrapper">
-          <div style="font-size: 16px">
+          <div style="font-size: 14px; margin-bottom: 8px">
             已完成 {{histories.length}} 道题目, 其中正确 {{ histories.filter(item => item.answer ===
-            calc(item))?.length }} 道, 错误 {{histories.filter(item => item.answer !==
-            calc(item))?.length }} 道。
+            calc(item))?.length }} 道题, 错误 {{histories.filter(item => item.answer !==
+            calc(item))?.length }} 道题。
+          </div>
+          <div style="font-size: 14px">
+            用时 {{ totalTime.format('m 分 s 秒') }}，平均每道题用时{{average.format('s 秒')}}
           </div>
           <ol class="histories-ol">
             <li v-for="(question, inde) in histories" :key="index">
@@ -263,7 +268,9 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      const { createApp, reactive, computed, onMounted, ref } = Vue;
+      const { createApp, reactive, computed, onMounted, ref, watch } = Vue;
+      dayjs.extend(dayjs_plugin_duration);
+      const sound = window.speechSynthesis;
 
       const storageHistories = (() => {
         const stored = localStorage.getItem('histories');
@@ -284,11 +291,10 @@
             completed: false,
             showAnswer: false,
             operatorSetting: 'random',
-            time: 0,
+            begin: null,
+            end: null,
           });
           const input = ref();
-          const interval = ref();
-          const timeout = ref();
 
           const histories = reactive(storageHistories);
 
@@ -316,11 +322,7 @@
             question.answer = undefined;
             question.showAnswer = false;
             question.completed = false;
-            question.time = 0;
-            clearInterval(interval.value);
-            interval.value = setInterval(() => {
-              question.time += 0.01;
-            }, 10);
+            question.begin = dayjs().valueOf();
             input.value.focus();
           };
 
@@ -342,7 +344,7 @@
 
           const judge = () => {
             question.completed = true;
-            clearInterval(interval.value);
+            question.end = dayjs().valueOf();
             histories.push({ ...question });
             localStorage.setItem('histories', JSON.stringify(histories));
           };
@@ -361,9 +363,37 @@
             localStorage.clear('histories');
           };
 
+          const getDuration = ({ begin, end }) => dayjs(end).diff(dayjs(begin), 'millisecond');
+
+          const duration = computed(() => getDuration(question));
+
+          const totalDuration = computed(() =>
+            histories.reduce((prev, curr) => prev + dayjs(curr.end).diff(dayjs(curr.begin)), 0)
+          );
+          const totalTime = computed(() => dayjs.duration(totalDuration.value, 'millisecond'));
+
+          const average = computed(() => {
+            return dayjs.duration(totalTime.value / histories.length, 'millisecond');
+          });
+
           onMounted(() => {
             next();
           });
+
+          watch(
+            () => question.completed,
+            value => {
+              if (value) {
+                sound.speak(
+                  new SpeechSynthesisUtterance(
+                    response.value.match(/ 牛/)
+                      ? response.value.replace(/🐮/g, '牛')
+                      : response.value.replace(/^[^ ]*/, '')
+                  )
+                );
+              }
+            }
+          );
 
           return {
             question,
@@ -381,6 +411,9 @@
             histories,
             calc,
             reset,
+            totalTime,
+            duration,
+            average,
           };
         },
       };
