@@ -4,20 +4,21 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="icon.jpeg" />
     <title>20以内加减法</title>
-    <!-- <script src="vue.global.prod.js"></script>
+    <script src="dayjs.min.js"></script>
+    <script src="duration.js"></script>
+    <script src="vue.global.prod.js"></script>
     <script src="echarts.min.js"></script>
     <script src="arco-vue.min.js"></script>
     <script src="arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="arco.css" /> -->
-    <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
+    <link rel="stylesheet" href="arco.css" />
+    <!-- <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
     <script src="https://unpkg.com/dayjs/plugin/duration.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/echarts@5.4.0/dist/echarts.min.js"></script>
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js"></script>
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" /> -->
     <style>
       body {
         font-size: 24px;
@@ -155,7 +156,6 @@
                 pattern="[0-9]*"
                 type="tel"
                 :readonly="question.completed"
-                autofocus
               />
             </span>
             <span v-if="question.showAnswer" style="color: rgb(var(--orange-6))">{{answer}}</span>
@@ -198,7 +198,7 @@
             calc(item))?.length }} 道题。
           </div>
           <div style="font-size: 14px">
-            用时 {{ totalTime.format('m 分 s 秒') }}，平均每道题用时{{average.format('s 秒')}}
+            用时 {{ totalTime.format('m 分 s 秒') }}，平均每道题用时 {{average.format('s 秒')}}
           </div>
           <ol class="histories-ol">
             <li v-for="(question, inde) in histories" :key="index">
@@ -323,7 +323,7 @@
             question.showAnswer = false;
             question.completed = false;
             question.begin = dayjs().valueOf();
-            input.value.focus();
+            // input.value.focus();
           };
 
           const setOperator = val => {
@@ -372,9 +372,9 @@
           );
           const totalTime = computed(() => dayjs.duration(totalDuration.value, 'millisecond'));
 
-          const average = computed(() => {
-            return dayjs.duration(totalTime.value / histories.length, 'millisecond');
-          });
+          const average = computed(() =>
+            dayjs.duration(histories.length ? totalTime.value / histories.length : 0, 'millisecond')
+          );
 
           onMounted(() => {
             next();
