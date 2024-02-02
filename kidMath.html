@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>20以内加减法</title>
+    <title>算术练习</title>
     <script src="dayjs.min.js"></script>
     <script src="duration.js"></script>
     <script src="vue.global.prod.js"></script>
@@ -114,18 +114,21 @@
     <div id="app">
       <a-layout>
         <a-layout-header class="page-header">
-          <h1 align="center">20以内加减法</h1>
+          <h1 align="center">算术练习</h1>
           <a-space fill style="justify-content: flex-end">
-            <a-radio-group
-              type="button"
-              v-model="question.operatorSetting"
-              @change="next"
-              size="large"
-            >
-              <a-radio value="random">自动</a-radio>
-              <a-radio value="+"><icon-plus /></a-radio>
-              <a-radio value="-"><icon-minus /></a-radio>
-            </a-radio-group>
+            <a-checkbox-group v-model="operations" @change="next" size="large">
+              <a-checkbox
+                v-for="operator in OPERATORS"
+                :key="operator"
+                :value="operator"
+                :disabled="isActiveAndOnly(operator)"
+              >
+                <template v-if="operator === '+'"><icon-plus /></template>
+                <template v-else-if="operator === '-'"><icon-minus /></template>
+                <template v-else-if="operator === '*'"><icon-close /></template>
+                <template v-else>{{operator}}</template>
+              </a-checkbox>
+            </a-checkbox-group>
             <a-button
               @click="reset"
               size="large"
@@ -140,7 +143,10 @@
         <a-layout-content class="page-content">
           <a-space class="question-wrapper">
             <span>{{question.first}}</span>
-            <span>{{question.operator}}</span>
+            <template v-if="question.operator === '+'"><icon-plus /></template>
+            <template v-else-if="question.operator === '-'"><icon-minus /></template>
+            <template v-else-if="question.operator === '*'"><icon-close /></template>
+            <template v-else>{{question.operator}}</template>
             <span>{{question.second}}</span>
             <span>=</span>
             <span>
@@ -165,9 +171,9 @@
               <div
                 class="response"
                 :style="{
-        background: correct ? 'rgb(var(--green-1))' : 'rgb(var(--red-1))',
-        color: correct ? 'rgb(var(--green-6))' : 'rgb(var(--red-6))' 
-      }"
+                  background: correct ? 'rgb(var(--green-1))' : 'rgb(var(--red-1))',
+                  color: correct ? 'rgb(var(--green-6))' : 'rgb(var(--red-6))' 
+                }"
               >
                 {{response}}
               </div>
@@ -244,7 +250,7 @@
     </div>
     <script type="text/javascript">
       const MAX = 20;
-      const OPERATORS = ['+', '-'];
+      const OPERATORS = ['+', '-', '*'];
       const RIGHT_RESPONSES = [
         '😀 太棒了',
         '😍 完美',
@@ -295,13 +301,16 @@
             end: null,
           });
           const input = ref();
+          const operations = ref([...OPERATORS]);
 
           const histories = reactive(storageHistories);
 
           const calc = question =>
             question.operator === OPERATORS[0]
               ? question.first + question.second
-              : question.first - question.second;
+              : question.operator === OPERATORS[1]
+              ? question.first - question.second
+              : question.first * question.second;
 
           const answer = computed(() => calc(question));
 
@@ -333,12 +342,15 @@
           const getQuestion = () => {
             question.operator =
               question.operatorSetting === 'random'
-                ? OPERATORS[getRandomInt(0, OPERATORS.length - 1)]
+                ? operations.value[getRandomInt(0, operations.value.length - 1)]
                 : question.operatorSetting;
-            question.first = getRandomInt(1, MAX);
+            question.first =
+              question.operator === OPERATORS[2] ? getRandomInt(1, 10) : getRandomInt(1, MAX);
             question.second =
               question.operator === OPERATORS[1]
                 ? getRandomInt(0, question.first)
+                : question.operator === OPERATORS[2]
+                ? getRandomInt(0, 9) // 乘法保证乘数范围在 0-9
                 : getRandomInt(1, MAX);
           };
 
@@ -375,6 +387,9 @@
           const average = computed(() =>
             dayjs.duration(histories.length ? totalTime.value / histories.length : 0, 'millisecond')
           );
+
+          const isActiveAndOnly = value =>
+            operations.value.length <= 1 && operations.value.includes(value);
 
           onMounted(() => {
             next();
@@ -414,6 +429,9 @@
             totalTime,
             duration,
             average,
+            operations,
+            OPERATORS,
+            isActiveAndOnly,
           };
         },
       };
