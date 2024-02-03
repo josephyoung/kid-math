@@ -4,3 +4,4 @@
 *.css
 duration.js
 vue.*
+node_modules/
