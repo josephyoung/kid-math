@@ -179,7 +179,13 @@
                   color: correct ? 'rgb(var(--green-6))' : 'rgb(var(--red-6))' 
                 }"
               >
-                <span class="animate__heartBeat">{{response}}</span>
+                <span
+                  class="animate__animated"
+                  :class="responseAnimationClass"
+                  @click="handleResponseClick"
+                >
+                  {{response}}
+                </span>
               </div>
               <a-space class="time" fill>
                 <span>本题用时</span>
@@ -278,6 +284,28 @@
       ];
       const ERROR_RESPONSES = ['😌 不对', '😓 再想一想', '😤 错误，继续努力', '😱 还要加油了'];
 
+      const ANIMATION_CLASSES = [
+        'animate__bounce',
+        'animate__rubberBand',
+        'animate__swing',
+        'animate__wobble',
+        'animate__heartBeat',
+        'animate__bounceInDown',
+        'animate__flip',
+        'animate__flipInX',
+        'animate__flipInY',
+        'animate__rotateIn',
+        'animate__rollIn',
+        'animate__lightSpeedInLeft',
+        'animate__lightSpeedInRight',
+        'animate__rotateInDownLeft',
+        'animate__rotateInDownRight',
+        'animate__jackInTheBox',
+        'animate__zoomIn',
+        'animate__zoomInDown',
+        'animate__slideInUp',
+      ];
+
       function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
@@ -310,6 +338,7 @@
           });
           const input = ref();
           const operations = ref([...OPERATORS]);
+          const responseAnimationClass = ref('');
 
           const histories = reactive(storageHistories);
 
@@ -400,6 +429,26 @@
           const isActiveAndOnly = value =>
             operations.value.length <= 1 && operations.value.includes(value);
 
+          const readResponse = () => {
+            sound.speak(
+              new SpeechSynthesisUtterance(
+                response.value.match(/ 牛/)
+                  ? response.value.replace(/🐮/g, '牛')
+                  : response.value.replace(/^[^ ]*/, '')
+              )
+            );
+          };
+
+          const animateResponse = () => {
+            responseAnimationClass.value =
+              ANIMATION_CLASSES[getRandomInt(0, ANIMATION_CLASSES.length - 1)];
+          };
+
+          const handleResponseClick = () => {
+            animateResponse();
+            readResponse();
+          };
+
           onMounted(() => {
             next();
           });
@@ -408,13 +457,8 @@
             () => question.completed,
             value => {
               if (value) {
-                sound.speak(
-                  new SpeechSynthesisUtterance(
-                    response.value.match(/ 牛/)
-                      ? response.value.replace(/🐮/g, '牛')
-                      : response.value.replace(/^[^ ]*/, '')
-                  )
-                );
+                animateResponse();
+                readResponse();
               }
             }
           );
@@ -441,6 +485,8 @@
             operations,
             OPERATORS,
             isActiveAndOnly,
+            handleResponseClick,
+            responseAnimationClass,
           };
         },
       };
