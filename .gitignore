@@ -3,3 +3,4 @@
 *.min.js
 *.css
 duration.js
+vue.*
