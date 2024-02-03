@@ -425,6 +425,7 @@
             operations.value.length <= 1 && operations.value.includes(value);
 
           const readResponse = () => {
+            sound.cancel();
             sound.speak(
               new SpeechSynthesisUtterance(
                 response.value.match(/ 牛/)
