@@ -178,14 +178,9 @@
                   background: correct ? 'rgb(var(--green-1))' : 'rgb(var(--red-1))',
                   color: correct ? 'rgb(var(--green-6))' : 'rgb(var(--red-6))' 
                 }"
+                @click="handleResponseClick"
               >
-                <span
-                  class="animate__animated"
-                  :class="responseAnimationClass"
-                  @click="handleResponseClick"
-                >
-                  {{response}}
-                </span>
+                <span class="animate__animated" :class="responseAnimationClass">{{response}}</span>
               </div>
               <a-space class="time" fill>
                 <span>本题用时</span>
