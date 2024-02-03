@@ -19,6 +19,10 @@
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js"></script>
     <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue-icon.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <style>
       body {
         font-size: 24px;
@@ -175,7 +179,7 @@
                   color: correct ? 'rgb(var(--green-6))' : 'rgb(var(--red-6))' 
                 }"
               >
-                {{response}}
+                <span class="animate__heartBeat">{{response}}</span>
               </div>
               <a-space class="time" fill>
                 <span>本题用时</span>
@@ -183,7 +187,7 @@
                   :value="duration / 1000"
                   :precision="2"
                   animation
-                  :animation-duration="500"
+                  :animation-duration="1000"
                 ></a-statistic>
                 <span>秒</span>
               </a-space>
@@ -261,7 +265,7 @@
         '🥰 你是最棒的',
         '🐄 太牛了',
         '✌🏻 完全正确',
-        '💋 爱你哦',
+        '💋 爱你哟',
         '👍🏻 学的真快',
         '😋 你真聪明',
         '☺️ 你真的很能干哦',
@@ -269,6 +273,7 @@
         '🌺 你做的非常好',
         '🌟 你做对了',
         '🤩 进步很大，继续保持',
+        '😎 帅呆了',
         '🐮🐮🐮🐮🐮 牛牛牛牛牛',
       ];
       const ERROR_RESPONSES = ['😌 不对', '😓 再想一想', '😤 错误，继续努力', '😱 还要加油了'];
