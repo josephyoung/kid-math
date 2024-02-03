@@ -4,3 +4,6 @@
 ```shell
 npm run dev
 ```
+
+### 截图
+<img src="screenshot/screenshot1.png" width='50%'>
