@@ -130,6 +130,7 @@
                 <template v-if="operator === '+'"><icon-plus /></template>
                 <template v-else-if="operator === '-'"><icon-minus /></template>
                 <template v-else-if="operator === '*'"><icon-close /></template>
+                <template v-else-if="operator === '/'">÷</template>
                 <template v-else>{{operator}}</template>
               </a-checkbox>
             </a-checkbox-group>
@@ -150,6 +151,7 @@
             <template v-if="question.operator === '+'"><icon-plus /></template>
             <template v-else-if="question.operator === '-'"><icon-minus /></template>
             <template v-else-if="question.operator === '*'"><icon-close /></template>
+            <template v-else-if="question.operator === '/'">÷</template>
             <template v-else>{{question.operator}}</template>
             <span>{{question.second}}</span>
             <span>=</span>
@@ -221,6 +223,7 @@
                   <template v-if="question.operator === '+'"><icon-plus /></template>
                   <template v-else-if="question.operator === '-'"><icon-minus /></template>
                   <template v-else-if="question.operator === '*'"><icon-close /></template>
+                  <template v-else-if="question.operator === '/'">÷</template>
                   <template v-else>{{question.operator}}</template>
                 </a-col>
                 <a-col :span="3">
@@ -258,7 +261,7 @@
     </div>
     <script type="text/javascript">
       const MAX = 20;
-      const OPERATORS = ['+', '-', '*'];
+      const OPERATORS = ['+', '-', '*', '/'];
       const RIGHT_RESPONSES = [
         '😀 太棒了',
         '😍 完美',
@@ -342,7 +345,9 @@
               ? question.first + question.second
               : question.operator === OPERATORS[1]
               ? question.first - question.second
-              : question.first * question.second;
+              : question.operator === OPERATORS[2]
+              ? question.first * question.second
+              : question.first / question.second;
 
           const answer = computed(() => calc(question));
 
@@ -377,14 +382,22 @@
               question.operatorSetting === 'random'
                 ? operations.value[getRandomInt(0, operations.value.length - 1)]
                 : question.operatorSetting;
-            question.first =
-              question.operator === OPERATORS[2] ? getRandomInt(1, 10) : getRandomInt(1, MAX);
-            question.second =
-              question.operator === OPERATORS[1]
-                ? getRandomInt(0, question.first)
-                : question.operator === OPERATORS[2]
-                ? getRandomInt(0, 9) // 乘法保证乘数范围在 0-9
-                : getRandomInt(1, MAX);
+            if (question.operator === OPERATORS[3]) {
+              // 除法：生成两个 1-9 的数，乘积作为被除数
+              const a = getRandomInt(1, 9);
+              const b = getRandomInt(1, 9);
+              question.first = a * b;
+              question.second = a;
+            } else {
+              question.first =
+                question.operator === OPERATORS[2] ? getRandomInt(1, 10) : getRandomInt(1, MAX);
+              question.second =
+                question.operator === OPERATORS[1]
+                  ? getRandomInt(0, question.first)
+                  : question.operator === OPERATORS[2]
+                  ? getRandomInt(0, 9) // 乘法保证乘数范围在 0-9
+                  : getRandomInt(1, MAX);
+            }
           };
 
           const judge = () => {
