@@ -212,7 +212,7 @@
             用时 {{ totalTime.format('m 分 s 秒') }}，平均每道题用时 {{average.format('s 秒')}}
           </div>
           <ol class="histories-ol">
-            <li v-for="(question, inde) in histories" :key="index">
+            <li v-for="(question, index) in histories" :key="index">
               <a-row :gutter="2">
                 <a-col :span="3">
                   <span>{{question.first}}</span>
@@ -310,7 +310,7 @@
       const sound = window.speechSynthesis;
 
       const storageHistories = (() => {
-        const stored = localStorage.getItem('histories');
+        const stored = localStorage.getItem('kid-math-histories');
         try {
           return stored ? JSON.parse(stored) : [];
         } catch {
@@ -391,7 +391,7 @@
             question.completed = true;
             question.end = dayjs().valueOf();
             histories.push({ ...question });
-            localStorage.setItem('histories', JSON.stringify(histories));
+            localStorage.setItem('kid-math-histories', JSON.stringify(histories));
           };
 
           const next = () => {
@@ -405,7 +405,7 @@
 
           const reset = () => {
             histories.length = 0;
-            localStorage.clear('histories');
+            localStorage.removeItem('kid-math-histories');
           };
 
           const getDuration = ({ begin, end }) => dayjs(end).diff(dayjs(begin), 'millisecond');
