@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "live-server --port=8080"
+    "dev": "live-server --port=8080",
+    "build": "cp index.html dist/kid-math.html"
   },
   "devDependencies": {
     "live-server": "^1.2.2"
