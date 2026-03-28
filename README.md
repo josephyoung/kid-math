@@ -61,7 +61,9 @@ kid-math/
 
 ## 截图
 
-<img src="screenshot/screenshot1.png" width="50%">
+**v2 (最新)** - 支持四种运算，显示答题历史：
+
+<img src="screenshot/screenshot-v2.png" width="50%">
 
 ## 许可证
 
