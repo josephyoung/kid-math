@@ -27,11 +27,15 @@ try {
   const content = fs.readFileSync(sourcePath, "utf-8");
 
   // 替换所有本地引用为 CDN
+  // 允许文件名前面有任意路径（支持根目录引用和 node_modules 引用两种格式）
   let result = content;
   Object.entries(replacementMap).forEach(([local, cdn]) => {
-    result = result.replace(new RegExp(`src="${local}"`, "g"), `src="${cdn}"`);
     result = result.replace(
-      new RegExp(`href="${local}"`, "g"),
+      new RegExp(`src="[^"]*${local}"`, "g"),
+      `src="${cdn}"`,
+    );
+    result = result.replace(
+      new RegExp(`href="[^"]*${local}"`, "g"),
       `href="${cdn}"`,
     );
   });

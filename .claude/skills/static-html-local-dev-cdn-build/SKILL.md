@@ -1,9 +1,9 @@
 ---
 name: static-html-local-dev-cdn-build
 description: |
-  Workflow for single-file static HTML projects: development uses local resource files for offline work, build automatically replaces with CDN links for deployment. Use when: (1) creating simple static HTML/Vue projects without build tools, (2) want offline development experience, (3) deployment needs CDN links to keep deployment size small. Includes best practice for locking versions to guarantee consistency between local and CDN.
+  Workflow for single-file static HTML projects: development uses local resource files for offline work, build automatically replaces with CDN links for deployment. Use when: (1) creating simple static HTML/Vue projects without build tools, (2) want offline development experience, (3) deployment needs CDN links to keep deployment size small. Includes best practice for locking versions to guarantee consistency between local and CDN. Supports two variants: (1) root-level file copies, (2) npm-managed dependencies in node_modules.
 author: Claude Code
-version: 1.1.0
+version: 1.2.0
 date: 2026-03-28
 ---
 
@@ -90,11 +90,15 @@ try {
   const content = fs.readFileSync(sourcePath, "utf-8");
 
   // Replace all local references with CDN
+  // Allow any path before filename works for both root and node_modules layouts
   let result = content;
   Object.entries(replacementMap).forEach(([local, cdn]) => {
-    result = result.replace(new RegExp(`src="${local}"`, "g"), `src="${cdn}"`);
     result = result.replace(
-      new RegExp(`href="${local}"`, "g"),
+      new RegExp(`src="[^"]*${local}"`, "g"),
+      `src="${cdn}"`,
+    );
+    result = result.replace(
+      new RegExp(`href="[^"]*${local}"`, "g"),
       `href="${cdn}"`,
     );
   });
@@ -196,6 +200,55 @@ How to get the current version:
 # Check latest version from npm
 npm view <package> version
 ```
+
+## Variant: npm-Managed Dependencies
+
+If you prefer to keep your project root clean and manage dependencies via npm instead of checking library files into git, use this variant:
+
+### Project Structure (npm variant)
+
+```
+project/
+├── index.html              # Development version - references node_modules
+├── package.json            # Contains build script + dependencies
+├── scripts/
+│   └── build.js            # Build script replaces local with CDN
+├── dist/
+│   └── output.html         # Build output - uses CDN links (ready for deployment)
+└── node_modules/           # Dependencies installed via npm (gitignored)
+```
+
+### Setup (npm variant)
+
+1. **Install dependencies via npm** with exact versions:
+
+```bash
+npm install --save-exact vue@3.5.31 dayjs@1.11.20 echarts@5.4.0 ...
+```
+
+2. **Reference from node_modules** in `index.html`:
+
+```html
+<!-- Development: from node_modules -->
+<script src="node_modules/vue/dist/vue.global.prod.js"></script>
+<script src="node_modules/dayjs/dayjs.min.js"></script>
+<link rel="stylesheet" href="node_modules/animate.css/animate.min.css" />
+```
+
+3. **Build script** - the same regex `src="[^"]*${local}"` works for both layouts because it matches any path before the filename. No changes needed to the replacement map.
+
+### Benefits of npm variant:
+
+- ✅ Project root stays clean, no large library files checked into git
+- ✅ Dependencies are explicitly listed in `package.json`
+- ✅ Easy to upgrade versions with `npm update`
+- ✅ Still fully offline after `npm install`
+- ✅ Same build output - CDN links for deployment
+
+### Tradeoffs:
+
+- Requires running `npm install` after cloning
+- `node_modules` is still large (but gitignored)
 
 ## Notes
 
