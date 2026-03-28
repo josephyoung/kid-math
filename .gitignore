@@ -1,7 +1,6 @@
 .vscode/
 .DS_Store
-*.min.js
-*.css
-duration.js
-vue.*
 node_modules/
+.claude/.cache/
+.playwright-mcp/
+npm-debug.log
