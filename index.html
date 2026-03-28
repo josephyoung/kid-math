@@ -384,7 +384,10 @@
           const answer = computed(() => calc(question));
 
           const answered = computed(
-            () => question.answer !== undefined && question.answer !== "",
+            () =>
+              question.answer !== undefined &&
+              question.answer !== null &&
+              question.answer !== "",
           );
 
           const correct = computed(
