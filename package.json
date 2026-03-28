@@ -1,8 +1,32 @@
 {
+  "name": "kid-math",
+  "version": "1.1.0",
+  "description": "小学算术练习应用 - 支持加减法、乘法、除法练习，带统计和语音反馈",
+  "main": "index.html",
   "scripts": {
-    "dev": "live-server --port=8080"
+    "dev": "live-server --port=8080",
+    "build": "node scripts/build.js",
+    "build:standalone": "node scripts/build-standalone.js"
+  },
+  "keywords": [
+    "math",
+    "education",
+    "kids",
+    "arithmetic"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@arco-design/web-vue": "2.57.0",
+    "animate.css": "4.1.1",
+    "dayjs": "1.11.20",
+    "echarts": "5.4.0",
+    "vue": "3.5.31"
   },
   "devDependencies": {
-    "live-server": "^1.2.2"
+    "live-server": "^1.2.2",
+    "html-minifier-terser": "^7.2.0",
+    "terser": "^5.36.0",
+    "clean-css": "^5.3.3"
   }
 }
