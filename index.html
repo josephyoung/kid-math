@@ -143,6 +143,7 @@
                 v-model="question.answer"
                 hide-button
                 @clear="reAnswer"
+                @input="(ev) => question.answer = ev.target ? Number(ev.target.value) : ev"
                 @keyup.enter="() => question.completed ? next() : answered ? judge() : void 0"
                 style="width: 100px"
                 size="large"
