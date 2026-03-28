@@ -54,3 +54,24 @@ npm run build
 
 - `MAX = 100`: 加减法最大数值
 - `OPERATORS = ['+', '-', '*', '/']`: 支持的运算符
+
+## 项目经验教训
+
+### Arco Design Vue InputNumber 输入 0 v-model 不更新
+
+**问题**: 当用户输入 `0` 时，输入框显示 `0` 但 `v-model` 绑定变量仍然是 `undefined`，导致提交按钮保持禁用。
+
+**原因**: Arco Design InputNumber 内部将 `0` 视为"空值"，不触发 `update:model-value` 事件。
+
+**修复**: 添加手动同步：
+
+```html
+<a-input-number
+  v-model="question.answer"
+  @input="(ev) => question.answer = ev.target ? Number(ev.target.value) : ev"
+/>
+```
+
+### HTML 标签闭合
+
+**经验**: 所有 HTML 标签必须正确闭合，否则会导致 Vue 模板解析错误，整个应用无法正常渲染。修改 HTML 后一定要检查标签闭合。
