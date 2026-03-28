@@ -4,3 +4,4 @@ node_modules/
 .claude/.cache/
 .playwright-mcp/
 npm-debug.log
+dist/standalone/
