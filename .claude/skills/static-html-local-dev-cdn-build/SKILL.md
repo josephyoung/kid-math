@@ -1,9 +1,9 @@
 ---
 name: static-html-local-dev-cdn-build
 description: |
-  Workflow for single-file static HTML projects: development uses local resource files for offline work, build automatically replaces with CDN links for deployment. Use when: (1) creating simple static HTML/Vue projects without build tools, (2) want offline development experience, (3) deployment needs CDN links to keep deployment size small.
+  Workflow for single-file static HTML projects: development uses local resource files for offline work, build automatically replaces with CDN links for deployment. Use when: (1) creating simple static HTML/Vue projects without build tools, (2) want offline development experience, (3) deployment needs CDN links to keep deployment size small. Includes best practice for locking versions to guarantee consistency between local and CDN.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-03-28
 ---
 
@@ -65,17 +65,17 @@ Use a simple Node.js script to replace local references with CDN URLs:
 const fs = require("fs");
 const path = require("path");
 
-// Map: local filename → CDN URL
+// Map: local filename → CDN URL (all versions locked for consistency)
 const replacementMap = {
-  "dayjs.min.js": "https://unpkg.com/dayjs/dayjs.min.js",
-  "duration.js": "https://unpkg.com/dayjs/plugin/duration.js",
-  "vue.global.prod.js": "https://unpkg.com/vue@3/dist/vue.global.prod.js",
+  "dayjs.min.js": "https://unpkg.com/dayjs@1.11.20/dayjs.min.js",
+  "duration.js": "https://unpkg.com/dayjs@1.11.20/plugin/duration.js",
+  "vue.global.prod.js": "https://unpkg.com/vue@3.5.31/dist/vue.global.prod.js",
   "echarts.min.js": "https://unpkg.com/echarts@5.4.0/dist/echarts.min.js",
   "arco-vue.min.js":
-    "https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js",
+    "https://unpkg.com/@arco-design/web-vue@2.57.0/dist/arco-vue.min.js",
   "arco-vue-icon.min.js":
-    "https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue-icon.min.js",
-  "arco.css": "https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css",
+    "https://unpkg.com/@arco-design/web-vue@2.57.0/dist/arco-vue-icon.min.js",
+  "arco.css": "https://unpkg.com/@arco-design/web-vue@2.57.0/dist/arco.css",
   "animate.min.css":
     "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css",
 };
@@ -163,6 +163,39 @@ Document the workflow in project README/CLAUDE.md:
 - Input: `index.html` with 8 local resource references
 - Output: `dist/kid-math.html` with all 8 references replaced with corresponding CDN URLs
 - No manual edits needed after initial setup - just run `npm run build` before deployment
+
+## Best Practice: Lock Exact Versions
+
+To guarantee that the CDN version always matches the local file version you've tested, **always lock to an exact semantic version** (`MAJOR.MINOR.PATCH`):
+
+❌ **Bad - can drift apart**:
+
+```javascript
+"arco-vue.min.js": "https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js",
+"vue.global.prod.js": "https://unpkg.com/vue@3/dist/vue.global.prod.js",
+"dayjs.min.js": "https://unpkg.com/dayjs/dayjs.min.js",
+```
+
+✅ **Good - guaranteed consistent**:
+
+```javascript
+"arco-vue.min.js": "https://unpkg.com/@arco-design/web-vue@2.57.0/dist/arco-vue.min.js",
+"vue.global.prod.js": "https://unpkg.com/vue@3.5.31/dist/vue.global.prod.js",
+"dayjs.min.js": "https://unpkg.com/dayjs@1.11.20/dayjs.min.js",
+```
+
+When you update the local copy of a library, remember to also update the version number in the CDN URL. This ensures:
+
+- Local development and deployed production always use the same version
+- No unexpected upgrades break your application
+- Reproducible builds
+
+How to get the current version:
+
+```bash
+# Check latest version from npm
+npm view <package> version
+```
 
 ## Notes
 

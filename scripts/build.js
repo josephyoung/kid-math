@@ -1,17 +1,18 @@
 const fs = require("fs");
 const path = require("path");
 
-// 本地文件到 CDN 的映射
+// 本地文件到 CDN 的映射（所有版本都已锁定，保证与本地文件一致
+// 当本地更新后请同步更新此处版本号
 const replacementMap = {
-  "dayjs.min.js": "https://unpkg.com/dayjs/dayjs.min.js",
-  "duration.js": "https://unpkg.com/dayjs/plugin/duration.js",
-  "vue.global.prod.js": "https://unpkg.com/vue@3/dist/vue.global.prod.js",
+  "dayjs.min.js": "https://unpkg.com/dayjs@1.11.20/dayjs.min.js",
+  "duration.js": "https://unpkg.com/dayjs@1.11.20/plugin/duration.js",
+  "vue.global.prod.js": "https://unpkg.com/vue@3.5.31/dist/vue.global.prod.js",
   "echarts.min.js": "https://unpkg.com/echarts@5.4.0/dist/echarts.min.js",
   "arco-vue.min.js":
-    "https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js",
+    "https://unpkg.com/@arco-design/web-vue@2.57.0/dist/arco-vue.min.js",
   "arco-vue-icon.min.js":
-    "https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue-icon.min.js",
-  "arco.css": "https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css",
+    "https://unpkg.com/@arco-design/web-vue@2.57.0/dist/arco-vue-icon.min.js",
+  "arco.css": "https://unpkg.com/@arco-design/web-vue@2.57.0/dist/arco.css",
   "animate.min.css":
     "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css",
 };
