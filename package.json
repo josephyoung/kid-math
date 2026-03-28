@@ -1,6 +1,6 @@
 {
   "name": "kid-math",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "小学算术练习应用 - 支持加减法、乘法、除法练习，带统计和语音反馈",
   "main": "index.html",
   "scripts": {
