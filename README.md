@@ -15,30 +15,42 @@
 
 ## 快速开始
 
-### 开发（离线可用）
+### 克隆项目
+
+```bash
+git clone https://github.com/josephlei/kid-math.git
+cd kid-math
+```
+
+### 安装依赖
 
 ```bash
 npm install
+```
+
+### 开发（离线可用）
+
+```bash
 npm run dev
 ```
 
-打开 http://localhost:8080 即可使用。开发模式使用本地资源文件，完全离线可用。
+打开 http://localhost:8080 即可使用。开发模式使用 `node_modules` 中的本地资源，完全离线可用。
 
-### 构建（用于部署）
+### 构建（用于部署 - CDN 版本）
 
 ```bash
 npm run build
 ```
 
-构建会自动将本地资源引用替换为 CDN 链接，输出到 `dist/kid-math.html`，可以直接部署。
+构建会自动将本地资源引用替换为 CDN 链接，输出到 `dist/kid-math.html`，体积小巧 (~17KB)，可以直接部署。
 
-### 独立全资源构建（完全离线）
+### 独立全资源构建（完全离线版本）
 
 ```bash
 npm run build:standalone
 ```
 
-输出到 `dist/standalone/kid-math.html`，**所有 JavaScript/CSS 资源已内联到单个 HTML 文件**，不需要网络即可完全离线运行。适合分享给他人离线使用。
+输出到 `dist/standalone/kid-math.html`，**所有 JavaScript/CSS 资源已内联到单个 HTML 文件**，不需要网络即可完全离线运行。适合分享给他人离线使用 (~2.9MB)。
 
 ## 项目结构
 
