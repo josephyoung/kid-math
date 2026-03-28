@@ -1,28 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-cn">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>算术练习</title>
-    <!-- <script src="dayjs.min.js"></script>
+    <script src="dayjs.min.js"></script>
     <script src="duration.js"></script>
     <script src="vue.global.prod.js"></script>
     <script src="echarts.min.js"></script>
     <script src="arco-vue.min.js"></script>
     <script src="arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="arco.css" /> -->
-    <script src="https://unpkg.com/dayjs/dayjs.min.js"></script>
-    <script src="https://unpkg.com/dayjs/plugin/duration.js"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="https://unpkg.com/echarts@5.4.0/dist/echarts.min.js"></script>
-    <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue.min.js"></script>
-    <script src="https://unpkg.com/@arco-design/web-vue@latest/dist/arco-vue-icon.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-vue@latest/dist/arco.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
+    <link rel="stylesheet" href="arco.css" />
+    <link rel="stylesheet" href="animate.min.css" />
     <style>
       body {
         font-size: 24px;
@@ -127,11 +117,7 @@
                 :value="operator"
                 :disabled="isActiveAndOnly(operator)"
               >
-                <template v-if="operator === '+'"><icon-plus /></template>
-                <template v-else-if="operator === '-'"><icon-minus /></template>
-                <template v-else-if="operator === '*'"><icon-close /></template>
-                <template v-else-if="operator === '/'">÷</template>
-                <template v-else>{{operator}}</template>
+                <operator-display :operator="operator"></operator-display>
               </a-checkbox>
             </a-checkbox-group>
             <a-button
@@ -148,11 +134,7 @@
         <a-layout-content class="page-content">
           <a-space class="question-wrapper">
             <span>{{question.first}}</span>
-            <template v-if="question.operator === '+'"><icon-plus /></template>
-            <template v-else-if="question.operator === '-'"><icon-minus /></template>
-            <template v-else-if="question.operator === '*'"><icon-close /></template>
-            <template v-else-if="question.operator === '/'">÷</template>
-            <template v-else>{{question.operator}}</template>
+            <operator-display :operator="question.operator"></operator-display>
             <span>{{question.second}}</span>
             <span>=</span>
             <span>
@@ -160,7 +142,6 @@
                 ref="input"
                 v-model="question.answer"
                 hide-button
-                @input="val => question.answer = val"
                 @clear="reAnswer"
                 @keyup.enter="() => question.completed ? next() : answered ? judge() : void 0"
                 style="width: 100px"
@@ -170,7 +151,9 @@
                 :readonly="question.completed"
               />
             </span>
-            <span v-if="question.showAnswer" style="color: rgb(var(--orange-6))">{{answer}}</span>
+            <span v-if="question.showAnswer" style="color: rgb(var(--orange-6))"
+              >{{answer}}</span
+            >
           </a-space>
           <a-space direction="vertical" fill>
             <template v-if="question.completed">
@@ -178,11 +161,13 @@
                 class="response"
                 :style="{
                   background: correct ? 'rgb(var(--green-1))' : 'rgb(var(--red-1))',
-                  color: correct ? 'rgb(var(--green-6))' : 'rgb(var(--red-6))' 
+                  color: correct ? 'rgb(var(--green-6))' : 'rgb(var(--red-6))'
                 }"
                 @click="handleResponseClick"
               >
-                <span class="animate__animated" :class="responseAnimationClass">{{response}}</span>
+                <span class="animate__animated" :class="responseAnimation"
+                  >{{response}}</span
+                >
               </div>
               <a-space class="time" fill>
                 <span>本题用时</span>
@@ -194,24 +179,35 @@
                 ></a-statistic>
                 <span>秒</span>
               </a-space>
-              <a-button @click="next" size="large" long type="primary">下一题</a-button>
+              <a-button @click="next" size="large" long type="primary"
+                >下一题</a-button
+              >
             </template>
-            <a-button type="primary" @click="judge" size="large" v-else :disabled="!answered" long>
+            <a-button
+              type="primary"
+              @click="judge"
+              size="large"
+              v-else
+              :disabled="!answered"
+              long
+            >
               提交
             </a-button>
             <template v-if="question.completed && !correct">
-              <a-button status="success" @click="showAnswer" size="large" long>查看答案</a-button>
+              <a-button status="success" @click="showAnswer" size="large" long
+                >查看答案</a-button
+              >
             </template>
           </a-space>
         </a-layout-content>
         <a-layout-footer class="histories-wrapper">
           <div style="font-size: 14px; margin-bottom: 8px">
-            已完成 {{histories.length}} 道题目, 其中正确 {{ histories.filter(item => item.answer ===
-            calc(item))?.length }} 道题, 错误 {{histories.filter(item => item.answer !==
-            calc(item))?.length }} 道题。
+            已完成 {{histories.length}} 道题目, 其中正确 {{ correctCount }}
+            道题, 错误 {{ incorrectCount }} 道题。
           </div>
           <div style="font-size: 14px">
-            用时 {{ totalTime.format('m 分 s 秒') }}，平均每道题用时 {{average.format('s 秒')}}
+            用时 {{ totalTime.format('m 分 s 秒') }}，平均每道题用时
+            {{average.format('s 秒')}}
           </div>
           <ol class="histories-ol">
             <li v-for="(question, index) in histories" :key="index">
@@ -220,11 +216,9 @@
                   <span>{{question.first}}</span>
                 </a-col>
                 <a-col :span="3">
-                  <template v-if="question.operator === '+'"><icon-plus /></template>
-                  <template v-else-if="question.operator === '-'"><icon-minus /></template>
-                  <template v-else-if="question.operator === '*'"><icon-close /></template>
-                  <template v-else-if="question.operator === '/'">÷</template>
-                  <template v-else>{{question.operator}}</template>
+                  <operator-display
+                    :operator="question.operator"
+                  ></operator-display>
                 </a-col>
                 <a-col :span="3">
                   <span>{{question.second}}</span>
@@ -244,7 +238,10 @@
                 </a-col>
                 <a-col :span="9">
                   <div style="text-align: right">
-                    <span v-if="calc(question) === question.answer" class="success">
+                    <span
+                      v-if="calc(question) === question.answer"
+                      class="success"
+                    >
                       <icon-check-circle />
                     </span>
                     <span v-else class="error">
@@ -261,67 +258,108 @@
     </div>
     <script type="text/javascript">
       const MAX = 100;
-      const OPERATORS = ['+', '-', '*', '/'];
+      const OPERATORS = ["+", "-", "*", "/"];
+      const CALCULATORS = {
+        "+": (a, b) => a + b,
+        "-": (a, b) => a - b,
+        "*": (a, b) => a * b,
+        "/": (a, b) => a / b,
+      };
+      const LOCAL_STORAGE_KEY = "kid-math-histories";
       const RIGHT_RESPONSES = [
-        '😀 太棒了',
-        '😍 完美',
-        '🥳 你好厉害',
-        '🥰 你是最棒的',
-        '🐄 太牛了',
-        '✌🏻 完全正确',
-        '💋 爱你哟',
-        '👍🏻 学的真快',
-        '😋 你真聪明',
-        '☺️ 你真的很能干哦',
-        '🐸 你真是个聪明的孩子',
-        '🌺 你做的非常好',
-        '🌟 你做对了',
-        '🤩 进步很大，继续保持',
-        '😎 帅呆了',
-        '🐮🐮🐮🐮🐮 牛牛牛牛牛',
+        "😀 太棒了",
+        "😍 完美",
+        "🥳 你好厉害",
+        "🥰 你是最棒的",
+        "🐄 太牛了",
+        "✌🏻 完全正确",
+        "💋 爱你哟",
+        "👍🏻 学的真快",
+        "😋 你真聪明",
+        "☺️ 你真的很能干哦",
+        "🐸 你真是个聪明的孩子",
+        "🌺 你做的非常好",
+        "🌟 你做对了",
+        "🤩 进步很大，继续保持",
+        "😎 帅呆了",
+        "🐮🐮🐮🐮🐮 牛牛牛牛牛",
       ];
-      const ERROR_RESPONSES = ['😌 不对', '😓 再想一想', '😤 错误，继续努力', '😱 还要加油了'];
+      const ERROR_RESPONSES = [
+        "😌 不对",
+        "😓 再想一想",
+        "😤 错误，继续努力",
+        "😱 还要加油了",
+      ];
 
       const ANIMATION_CLASSES = [
-        'animate__bounce',
-        'animate__rubberBand',
-        'animate__swing',
-        'animate__wobble',
-        'animate__heartBeat',
-        'animate__bounceInDown',
-        'animate__flip',
-        'animate__flipInX',
-        'animate__flipInY',
-        'animate__rotateIn',
-        'animate__rollIn',
-        'animate__lightSpeedInLeft',
-        'animate__lightSpeedInRight',
-        'animate__rotateInDownLeft',
-        'animate__rotateInDownRight',
-        'animate__jackInTheBox',
-        'animate__zoomIn',
-        'animate__zoomInDown',
-        'animate__slideInUp',
+        "animate__bounce",
+        "animate__rubberBand",
+        "animate__swing",
+        "animate__wobble",
+        "animate__heartBeat",
+        "animate__bounceInDown",
+        "animate__flip",
+        "animate__flipInX",
+        "animate__flipInY",
+        "animate__rotateIn",
+        "animate__rollIn",
+        "animate__lightSpeedInLeft",
+        "animate__lightSpeedInRight",
+        "animate__rotateInDownLeft",
+        "animate__rotateInDownRight",
+        "animate__jackInTheBox",
+        "animate__zoomIn",
+        "animate__zoomInDown",
+        "animate__slideInUp",
       ];
 
       function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      const { createApp, reactive, computed, onMounted, ref, watch, nextTick } = Vue;
-      dayjs.extend(dayjs_plugin_duration);
-      const sound = window.speechSynthesis;
+      function getRandomElement(arr) {
+        return arr[getRandomInt(0, arr.length - 1)];
+      }
 
-      const storageHistories = (() => {
-        const stored = localStorage.getItem('kid-math-histories');
+      function loadHistories() {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
         try {
           return stored ? JSON.parse(stored) : [];
         } catch {
           return [];
         }
-      })();
+      }
+
+      function saveHistories(histories) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(histories));
+      }
+
+      function clearHistories() {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      }
+
+      const { createApp, reactive, computed, onMounted, ref, watch, nextTick } =
+        Vue;
+      dayjs.extend(dayjs_plugin_duration);
+      const sound = window.speechSynthesis;
+
+      const storageHistories = loadHistories();
+
+      const OperatorDisplay = {
+        props: ["operator"],
+        template: `
+          <icon-plus v-if="operator === '+'" />
+          <icon-minus v-else-if="operator === '-'" />
+          <icon-close v-else-if="operator === '*'" />
+          <template v-else-if="operator === '/'">÷</template>
+          <template v-else>{{operator}}</template>
+        `,
+      };
 
       const app = {
+        components: {
+          OperatorDisplay,
+        },
         setup() {
           const question = reactive({
             first: 0,
@@ -330,37 +368,35 @@
             answer: undefined,
             completed: false,
             showAnswer: false,
-            operatorSetting: 'random',
+            operatorSetting: "random",
             begin: null,
             end: null,
           });
           const input = ref();
           const operations = ref([...OPERATORS]);
-          const responseAnimationClass = ref('');
+          const responseAnimation = ref("");
 
           const histories = reactive(storageHistories);
 
-          const calc = question =>
-            question.operator === OPERATORS[0]
-              ? question.first + question.second
-              : question.operator === OPERATORS[1]
-              ? question.first - question.second
-              : question.operator === OPERATORS[2]
-              ? question.first * question.second
-              : question.first / question.second;
+          const calc = (question) =>
+            CALCULATORS[question.operator](question.first, question.second);
 
           const answer = computed(() => calc(question));
 
-          const answered = computed(() => question.answer !== undefined && question.answer !== '');
+          const answered = computed(
+            () => question.answer !== undefined && question.answer !== "",
+          );
 
           const correct = computed(
-            () => answered.value && answer.value === Number(question.answer)
+            () => answered.value && answer.value === Number(question.answer),
           );
 
           const response = computed(() => {
             if (question.completed && answered.value) {
-              const responses = correct.value ? RIGHT_RESPONSES : ERROR_RESPONSES;
-              return responses[getRandomInt(0, responses.length - 1)];
+              const responses = correct.value
+                ? RIGHT_RESPONSES
+                : ERROR_RESPONSES;
+              return getRandomElement(responses);
             }
           });
 
@@ -370,17 +406,23 @@
             question.completed = false;
             question.begin = dayjs().valueOf();
             await nextTick();
-            input.value.focus();
-          };
-
-          const setOperator = val => {
-            question.operator = val;
+            // 安全地尝试聚焦到输入框
+            if (input.value) {
+              // Arco InputNumber 组件实例可能暴露 focus 方法，或者需要找内部的 input
+              if (typeof input.value.focus === "function") {
+                input.value.focus();
+              } else if (input.value.$el) {
+                // 从组件根元素查找内部 input
+                const innerInput = input.value.$el.querySelector("input");
+                innerInput?.focus?.();
+              }
+            }
           };
 
           const getQuestion = () => {
             question.operator =
-              question.operatorSetting === 'random'
-                ? operations.value[getRandomInt(0, operations.value.length - 1)]
+              question.operatorSetting === "random"
+                ? getRandomElement(operations.value)
                 : question.operatorSetting;
             if (question.operator === OPERATORS[3]) {
               // 除法：生成两个 1-9 的数，乘积作为被除数
@@ -390,13 +432,15 @@
               question.second = a;
             } else {
               question.first =
-                question.operator === OPERATORS[2] ? getRandomInt(1, 10) : getRandomInt(1, MAX);
+                question.operator === OPERATORS[2]
+                  ? getRandomInt(1, 10)
+                  : getRandomInt(1, MAX);
               question.second =
                 question.operator === OPERATORS[1]
                   ? getRandomInt(0, question.first)
                   : question.operator === OPERATORS[2]
-                  ? getRandomInt(0, 9) // 乘法保证乘数范围在 0-9
-                  : getRandomInt(1, MAX);
+                    ? getRandomInt(0, 9) // 乘法保证乘数范围在 0-9
+                    : getRandomInt(1, MAX);
             }
           };
 
@@ -404,7 +448,7 @@
             question.completed = true;
             question.end = dayjs().valueOf();
             histories.push({ ...question });
-            localStorage.setItem('kid-math-histories', JSON.stringify(histories));
+            saveHistories(histories);
           };
 
           const next = () => {
@@ -418,23 +462,35 @@
 
           const reset = () => {
             histories.length = 0;
-            localStorage.removeItem('kid-math-histories');
+            clearHistories();
           };
 
-          const getDuration = ({ begin, end }) => dayjs(end).diff(dayjs(begin), 'millisecond');
+          const getDuration = ({ begin, end }) => end - begin;
 
           const duration = computed(() => getDuration(question));
 
-          const totalDuration = computed(() =>
-            histories.reduce((prev, curr) => prev + dayjs(curr.end).diff(dayjs(curr.begin)), 0)
+          const correctCount = computed(
+            () => histories.filter((item) => item.answer === calc(item)).length,
           );
-          const totalTime = computed(() => dayjs.duration(totalDuration.value, 'millisecond'));
+          const incorrectCount = computed(
+            () => histories.length - correctCount.value,
+          );
+
+          const totalDuration = computed(() =>
+            histories.reduce((prev, curr) => prev + getDuration(curr), 0),
+          );
+          const totalTime = computed(() =>
+            dayjs.duration(totalDuration.value, "millisecond"),
+          );
 
           const average = computed(() =>
-            dayjs.duration(histories.length ? totalTime.value / histories.length : 0, 'millisecond')
+            dayjs.duration(
+              histories.length ? totalDuration.value / histories.length : 0,
+              "millisecond",
+            ),
           );
 
-          const isActiveAndOnly = value =>
+          const isActiveAndOnly = (value) =>
             operations.value.length <= 1 && operations.value.includes(value);
 
           const readResponse = () => {
@@ -442,15 +498,14 @@
             sound.speak(
               new SpeechSynthesisUtterance(
                 response.value.match(/ 牛/)
-                  ? response.value.replace(/🐮/g, '牛')
-                  : response.value.replace(/^[^ ]*/, '')
-              )
+                  ? response.value.replace(/🐮/g, "牛")
+                  : response.value.replace(/^[^ ]*/, ""),
+              ),
             );
           };
 
           const animateResponse = () => {
-            responseAnimationClass.value =
-              ANIMATION_CLASSES[getRandomInt(0, ANIMATION_CLASSES.length - 1)];
+            responseAnimation.value = getRandomElement(ANIMATION_CLASSES);
           };
 
           const handleResponseClick = () => {
@@ -459,17 +514,20 @@
           };
 
           onMounted(() => {
+            // 暴露到 window 用于调试
+            window.__question = question;
+            window.__input = input;
             next();
           });
 
           watch(
             () => question.completed,
-            value => {
+            (value) => {
               if (value) {
                 animateResponse();
                 readResponse();
               }
-            }
+            },
           );
 
           return {
@@ -478,7 +536,6 @@
             correct,
             response,
             reAnswer,
-            setOperator,
             getQuestion,
             judge,
             next,
@@ -488,6 +545,8 @@
             histories,
             calc,
             reset,
+            correctCount,
+            incorrectCount,
             totalTime,
             duration,
             average,
@@ -495,12 +554,12 @@
             OPERATORS,
             isActiveAndOnly,
             handleResponseClick,
-            responseAnimationClass,
+            responseAnimation,
           };
         },
       };
 
-      createApp(app).use(ArcoVue).use(ArcoVueIcon).mount('#app');
+      createApp(app).use(ArcoVue).use(ArcoVueIcon).mount("#app");
     </script>
   </body>
 </html>
