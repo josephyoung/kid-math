@@ -475,13 +475,16 @@
             () => histories.length - correctCount.value,
           );
 
+          // totalDuration: 总用时，单位毫秒（原始数字，方便计算）
           const totalDuration = computed(() =>
             histories.reduce((prev, curr) => prev + getDuration(curr), 0),
           );
+          // totalTime: 包装为 dayjs Duration 对象，方便格式化显示（m 分 s 秒）
           const totalTime = computed(() =>
             dayjs.duration(totalDuration.value, "millisecond"),
           );
 
+          // average: 平均每题用时，包装为 dayjs Duration 对象方便格式化
           const average = computed(() =>
             dayjs.duration(
               histories.length ? totalDuration.value / histories.length : 0,
