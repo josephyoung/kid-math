@@ -24,6 +24,14 @@ npm run build
 
 运行脚本将本地资源引用替换为 CDN 链接，并将处理后的 `index.html` 输出到 `dist/kid-math.html` 用于部署。
 
+**独立全资源构建**:
+
+```bash
+npm run build:standalone
+```
+
+输出到 `dist/standalone/kid-math.html`，所有资源已内联，可完全离线运行。
+
 ## Architecture
 
 **单文件应用**: 所有代码都在 `index.html` 中，包含 HTML 模板、样式和 Vue 3 应用逻辑。
