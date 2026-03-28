@@ -383,12 +383,7 @@
 
           const answer = computed(() => calc(question));
 
-          const answered = computed(
-            () =>
-              question.answer !== undefined &&
-              question.answer !== null &&
-              question.answer !== "",
-          );
+          const answered = computed(() => typeof question.answer === "number");
 
           const correct = computed(
             () => answered.value && answer.value === Number(question.answer),
